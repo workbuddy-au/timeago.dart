@@ -1,6 +1,7 @@
 import 'package:timeago/src/messages/en_messages.dart';
 import 'package:timeago/src/messages/es_messages.dart';
 import 'package:timeago/src/messages/lookupmessages.dart';
+import 'package:timeago/src/util.dart';
 
 String _default = 'en';
 
@@ -51,7 +52,8 @@ String format(DateTime date,
     {String? locale, DateTime? clock, bool allowFromNow = false}) {
   final _locale = locale ?? _default;
   if (_lookupMessagesMap[_locale] == null) {
-    print("Locale [$_locale] has not been added, using [$_default] as fallback. To add a locale use [setLocaleMessages]");
+    print(
+        "Locale [$_locale] has not been added, using [$_default] as fallback. To add a locale use [setLocaleMessages]");
   }
   final _allowFromNow = allowFromNow;
   final messages = _lookupMessagesMap[_locale] ?? EnMessages();
@@ -99,6 +101,62 @@ String format(DateTime date,
     result = messages.aboutAYear(months.round());
   } else {
     result = messages.years(years.round());
+  }
+
+  return [prefix, result, suffix]
+      .where((str) => str.isNotEmpty)
+      .join(messages.wordSeparator());
+}
+
+String simpleFormat(
+  DateTime date, {
+  String? locale,
+  DateTime? clock,
+  bool allowFromNow = false,
+  bool floor = false,
+}) {
+  final _locale = locale ?? _default;
+  if (_lookupMessagesMap[_locale] == null) {
+    print(
+        "Locale [$_locale] has not been added, using [$_default] as fallback. To add a locale use [setLocaleMessages]");
+  }
+  final _allowFromNow = allowFromNow;
+  final messages = _lookupMessagesMap[_locale] ?? EnMessages();
+  final _clock = clock ?? DateTime.now();
+  var elapsed = _clock.millisecondsSinceEpoch - date.millisecondsSinceEpoch;
+
+  String prefix, suffix;
+
+  if (_allowFromNow && elapsed < 0) {
+    elapsed = date.isBefore(_clock) ? elapsed : elapsed.abs();
+    prefix = messages.prefixFromNow();
+    suffix = messages.suffixFromNow();
+  } else {
+    prefix = messages.prefixAgo();
+    suffix = messages.suffixAgo();
+  }
+
+  final num seconds = elapsed / 1000;
+  final num minutes = seconds / 60;
+  final num hours = minutes / 60;
+  final num days = hours / 24;
+  final num months = days / 30;
+  final num years = days / 365;
+
+  String result;
+  if (seconds < kMinute) {
+    result =
+        messages.lessThanOneMinute(floor ? seconds.floor() : seconds.round());
+  } else if (seconds < kHour) {
+    result = messages.minutes(floor ? minutes.floor() : minutes.round());
+  } else if (seconds < kDay) {
+    result = messages.hours(floor ? hours.floor() : hours.round());
+  } else if (seconds < kMonth) {
+    result = messages.days(floor ? days.floor() : days.round());
+  } else if (seconds < kYear) {
+    result = messages.months(floor ? months.floor() : months.round());
+  } else {
+    result = messages.years(floor ? years.floor() : years.round());
   }
 
   return [prefix, result, suffix]
