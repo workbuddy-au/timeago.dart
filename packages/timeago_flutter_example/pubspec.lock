@@ -230,7 +230,7 @@ packages:
       path: "../timeago_flutter"
       relative: true
     source: path
-    version: "3.4.0"
+    version: "3.5.0"
   typed_data:
     dependency: transitive
     description:
