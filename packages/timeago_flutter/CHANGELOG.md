@@ -1,3 +1,6 @@
+## [3.7.1]
+- Update minimum Dart SDK to 3.8.0 for Flutter 3.32 compatibility
+
 ## [3.7.0]
 - Add support for `timeago` 3.7.0
 
